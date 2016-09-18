@@ -13,10 +13,10 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "BlynkDebug.h"
-#include "BlynkProtocolDefs.h"
-#include "BlynkApi.h"
-#include "BlynkUtility.h"
+#include <blynk/BlynkDebug.h>
+#include <blynk/BlynkProtocolDefs.h>
+#include <blynk/BlynkApi.h>
+#include <utility/BlynkUtility.h>
 
 template <class Transp>
 class BlynkProtocol
@@ -79,13 +79,6 @@ public:
     void sendCmd(uint8_t cmd, uint16_t id = 0, const void* data = NULL, size_t length = 0, const void* data2 = NULL, size_t length2 = 0);
 
 private:
-
-    void internalReconnect() {
-        state = CONNECTING;
-        conn.disconnect();
-        BlynkOnDisconnected();
-    }
-
     int readHeader(BlynkHeader& hdr);
     uint16_t getNextMsgId();
 
@@ -132,10 +125,12 @@ bool BlynkProtocol<Transp>::run(bool avail)
             //BLYNK_LOG2(BLYNK_F("Available: "), conn.available());
             //const unsigned long t = micros();
             if (!processInput()) {
+                conn.disconnect();
 // TODO: Only when in direct mode?
 #ifdef BLYNK_USE_DIRECT_CONNECT
-                internalReconnect();
+                state = CONNECTING;
 #endif
+                //BlynkOnDisconnected();
                 return false;
             }
             //BLYNK_LOG2(BLYNK_F("Proc time: "), micros() - t);
@@ -148,7 +143,7 @@ bool BlynkProtocol<Transp>::run(bool avail)
         if (!tconn) {
             state = CONNECTING;
             lastHeartbeat = t;
-            BlynkOnDisconnected();
+            //BlynkOnDisconnected();
             return false;
         }
 
@@ -158,7 +153,9 @@ bool BlynkProtocol<Transp>::run(bool avail)
 #else
             BLYNK_LOG1(BLYNK_F("Heartbeat timeout"));
 #endif
-            internalReconnect();
+            conn.disconnect();
+            state = CONNECTING;
+            //BlynkOnDisconnected();
             return false;
         } else if ((t - lastActivityIn  > 1000UL * BLYNK_HEARTBEAT ||
                     t - lastActivityOut > 1000UL * BLYNK_HEARTBEAT) &&
@@ -427,7 +424,9 @@ void BlynkProtocol<Transp>::sendCmd(uint8_t cmd, uint16_t id, const void* data, 
 #ifdef BLYNK_DEBUG
         BLYNK_LOG4(BLYNK_F("Sent "), wlen, '/', full_length);
 #endif
-        internalReconnect();
+        conn.disconnect();
+        state = CONNECTING;
+        //BlynkOnDisconnected();
         return;
     }
 
@@ -438,7 +437,9 @@ void BlynkProtocol<Transp>::sendCmd(uint8_t cmd, uint16_t id, const void* data, 
     //BLYNK_LOG2(BLYNK_F("Delta: "), deltaCmd);
     if (deltaCmd < (1000/BLYNK_MSG_LIMIT)) {
         BLYNK_LOG_TROUBLE(BLYNK_F("flood-error"));
-        internalReconnect();
+        conn.disconnect();
+        state = CONNECTING;
+        //BlynkOnDisconnected();
     }
 #else
     lastActivityOut = this->getMillis();
