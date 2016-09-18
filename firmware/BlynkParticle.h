@@ -11,8 +11,8 @@
 #ifndef BlynkParticle_h
 #define BlynkParticle_h
 
-#include "BlynkApiParticle.h"
-#include "BlynkProtocol.h"
+#include "blykn/BlynkApiParticle.h"
+#include "blykn/BlynkProtocol.h"
 
 class BlynkTransportParticle
 {
