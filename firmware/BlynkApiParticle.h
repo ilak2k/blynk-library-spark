@@ -11,7 +11,7 @@
 #ifndef BlynkApi_h
 #define BlynkApi_h
 
-#include <BlynkConfig.h>
+#include <blynk/BlynkConfig.h>
 #include <BlynkDebug.h>
 #include <BlynkParam.h>
 #include <BlynkHandlers.h>
