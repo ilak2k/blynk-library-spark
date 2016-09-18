@@ -12,10 +12,10 @@
 #define BlynkApi_h
 
 #include <blynk/BlynkConfig.h>
-#include <BlynkDebug.h>
-#include <BlynkParam.h>
-#include <BlynkHandlers.h>
-#include <BlynkProtocolDefs.h>
+#include <blynk/BlynkDebug.h>
+#include <blynk/BlynkParam.h>
+#include <blynk/BlynkHandlers.h>
+#include <blynk/BlynkProtocolDefs.h>
 
 /**
  * Represents high-level functions of Blynk
